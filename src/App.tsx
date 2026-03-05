@@ -91,6 +91,7 @@ export default function App() {
   const [bigBoardMode, setBigBoardMode] = useState(false)
   const [partyMode, setPartyMode] = useState(true)
   const [celebrate, setCelebrate] = useState(false)
+  const [hydrated, setHydrated] = useState(false)
 
   const masked = useMemo(() => {
     return phrase.split('').map((ch) => {
@@ -321,7 +322,10 @@ export default function App() {
 
   useEffect(() => {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return
+    if (!raw) {
+      setHydrated(true)
+      return
+    }
     try {
       const data = JSON.parse(raw) as {
         players?: Player[]
@@ -345,15 +349,19 @@ export default function App() {
       setStatus('Состояние восстановлено')
     } catch {
       // ignore broken storage
+    } finally {
+      setHydrated(true)
     }
   }, [])
 
   useEffect(() => {
+    if (!hydrated) return
+
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({ players, activePlayerId, phrase, category, roundTitle, hint, openedLetters, usedLetters }),
     )
-  }, [players, activePlayerId, phrase, category, roundTitle, hint, openedLetters, usedLetters])
+  }, [hydrated, players, activePlayerId, phrase, category, roundTitle, hint, openedLetters, usedLetters])
 
   return (
     <div className="page">
