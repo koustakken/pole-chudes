@@ -57,6 +57,7 @@ export default function App() {
   const [wordInput, setWordInput] = useState('')
   const [status, setStatus] = useState('Готово к игре')
   const [screenMode, setScreenMode] = useState(false)
+  const [showHotkeys, setShowHotkeys] = useState(true)
 
   const masked = useMemo(() => {
     return phrase.split('').map((ch) => {
@@ -203,6 +204,37 @@ export default function App() {
     setStatus('Новый раунд готов')
   }
 
+  const applyCurrentSector = () => {
+    if (!currentSector) return
+    if (currentSector.type === 'points') {
+      applyPointsToActive(currentSector.value)
+      setStatus(`Начислено ${currentSector.value} активному игроку`)
+    }
+    if (currentSector.type === 'bankrupt' && activePlayerId) {
+      updateScore(activePlayerId, 0)
+      setStatus('Активному игроку применён БАНКРОТ')
+    }
+    if (currentSector.type === 'lose_turn') {
+      nextPlayer()
+      setStatus('Пропуск хода: переход к следующему игроку')
+    }
+  }
+
+  const bankruptActive = () => {
+    if (!activePlayerId) return
+    updateScore(activePlayerId, 0)
+    setStatus('Очки активного игрока обнулены')
+  }
+
+  const openFullscreen = async () => {
+    const el = document.documentElement
+    if (!document.fullscreenElement) {
+      await el.requestFullscreen()
+    } else {
+      await document.exitFullscreen()
+    }
+  }
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const tag = (event.target as HTMLElement | null)?.tagName
@@ -216,6 +248,11 @@ export default function App() {
       if (event.key.toLowerCase() === 'n') {
         event.preventDefault()
         nextPlayer()
+      }
+
+      if (event.key.toLowerCase() === 'f') {
+        event.preventDefault()
+        void openFullscreen()
       }
     }
 
@@ -260,7 +297,11 @@ export default function App() {
       <header className="topbar">
         <h1>Поле Чудес — студия ведущего</h1>
         <div className="topbarActions">
-          <span className="step">Шаг 4/6: screen mode для стрима</span>
+          <span className="step">Шаг 5/6: пульт ведущего (без таймера)</span>
+          <button className="ghost" onClick={() => setShowHotkeys((v) => !v)}>
+            {showHotkeys ? 'Скрыть hotkeys' : 'Показать hotkeys'}
+          </button>
+          <button className="ghost" onClick={() => void openFullscreen()}>Fullscreen (F)</button>
           <button className="ghost" onClick={() => setScreenMode((v) => !v)}>
             {screenMode ? 'Выйти из Screen Mode' : 'Screen Mode'}
           </button>
@@ -277,6 +318,16 @@ export default function App() {
           <button onClick={spinWheel} disabled={isSpinning}>{isSpinning ? 'Крутим...' : 'Крутить барабан (Space)'}</button>
         </div>
       </section>}
+
+      {!screenMode && (
+        <section className="controlCard">
+          <button className="ghost" onClick={applyCurrentSector}>Применить сектор</button>
+          <button className="ghost" onClick={bankruptActive}>Банкрот активному</button>
+          <button className="ghost" onClick={nextPlayer}>Пропуск хода</button>
+          <button className="ghost" onClick={resetRound}>Сброс раунда</button>
+          {showHotkeys && <div className="hotkeys">Hotkeys: Space — барабан · N — следующий игрок · F — fullscreen</div>}
+        </section>
+      )}
 
       <main className={`layout ${screenMode ? 'layoutScreen' : ''}`}>
         <section className="boardCard">

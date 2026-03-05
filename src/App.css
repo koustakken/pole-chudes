@@ -51,6 +51,24 @@
   gap: 10px;
 }
 
+.controlCard {
+  margin-bottom: 14px;
+  background: #ffffff;
+  border: 1px solid #dbe5f4;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.hotkeys {
+  margin-left: auto;
+  font-size: 12px;
+  color: #64748b;
+}
+
 .turnActions {
   display: flex;
   gap: 8px;
@@ -319,6 +337,15 @@ button.danger {
   .turnCard {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .controlCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hotkeys {
+    margin-left: 0;
   }
 
   .topbarActions {
