@@ -18,6 +18,12 @@ const DEFAULT_PHRASE = 'ПОЛЕ ЧУДЕС'
 const DEFAULT_CATEGORY = 'Демо раунд'
 const STORAGE_KEY = 'pole-chudes-state-v1'
 
+const PHRASE_PRESETS = [
+  { category: 'Кино', phrase: 'БРИЛЛИАНТОВАЯ РУКА' },
+  { category: 'Мультфильм', phrase: 'БРЕМЕНСКИЕ МУЗЫКАНТЫ' },
+  { category: 'Пословица', phrase: 'СЕМЬ РАЗ ОТМЕРЬ ОДИН РАЗ ОТРЕЖЬ' },
+]
+
 const SECTORS: Sector[] = [
   { type: 'points', value: 100, label: '100' },
   { type: 'points', value: 200, label: '200' },
@@ -58,6 +64,7 @@ export default function App() {
   const [status, setStatus] = useState('Готово к игре')
   const [screenMode, setScreenMode] = useState(false)
   const [showHotkeys, setShowHotkeys] = useState(true)
+  const [bigBoardMode, setBigBoardMode] = useState(false)
 
   const masked = useMemo(() => {
     return phrase.split('').map((ch) => {
@@ -204,6 +211,13 @@ export default function App() {
     setStatus('Новый раунд готов')
   }
 
+  const quickStartRound = (nextCategory?: string, nextPhrase?: string) => {
+    if (nextCategory) setCategory(nextCategory)
+    if (nextPhrase) setPhrase(nextPhrase)
+    resetRound()
+    setStatus('Раунд запущен')
+  }
+
   const applyCurrentSector = () => {
     if (!currentSector) return
     if (currentSector.type === 'points') {
@@ -297,10 +311,14 @@ export default function App() {
       <header className="topbar">
         <h1>Поле Чудес — студия ведущего</h1>
         <div className="topbarActions">
-          <span className="step">Шаг 5/6: пульт ведущего (без таймера)</span>
+          <span className="step">Шаг 6/6: финальный стрим-полиш</span>
+          <button className="ghost" onClick={() => setBigBoardMode((v) => !v)}>
+            {bigBoardMode ? 'Обычное табло' : 'Big Board'}
+          </button>
           <button className="ghost" onClick={() => setShowHotkeys((v) => !v)}>
             {showHotkeys ? 'Скрыть hotkeys' : 'Показать hotkeys'}
           </button>
+          <button className="ghost" onClick={() => quickStartRound()}>Быстрый старт раунда</button>
           <button className="ghost" onClick={() => void openFullscreen()}>Fullscreen (F)</button>
           <button className="ghost" onClick={() => setScreenMode((v) => !v)}>
             {screenMode ? 'Выйти из Screen Mode' : 'Screen Mode'}
@@ -353,15 +371,23 @@ export default function App() {
               </div>
 
               {showAnswer && <div className="answerPreview">Ответ: {phrase}</div>}
+
+              <div className="presetRow">
+                {PHRASE_PRESETS.map((p) => (
+                  <button key={p.phrase} className="ghost" onClick={() => quickStartRound(p.category, p.phrase)}>
+                    {p.category}
+                  </button>
+                ))}
+              </div>
             </>
           )}
 
-          <div className="boardGrid">
+          <div className={`boardGrid ${bigBoardMode ? 'boardGridBig' : ''}`}>
             {masked.map((ch, i) =>
               ch === ' ' ? (
                 <div key={`space-${i}`} className="space" />
               ) : (
-                <div key={i} className="cell">{ch}</div>
+                <div key={i} className={`cell ${bigBoardMode ? 'cellBig' : ''}`}>{ch}</div>
               ),
             )}
           </div>
@@ -432,9 +458,9 @@ export default function App() {
             {players.length === 0 ? (
               <div className="empty">Пока нет игроков</div>
             ) : (
-              <div className="players">
+              <div className={`players ${screenMode ? 'playersStream' : ''}`}>
                 {players.map((p) => (
-                  <div key={p.id} className={`player ${activePlayerId === p.id ? 'active' : ''}`}>
+                  <div key={p.id} className={`player ${activePlayerId === p.id ? 'active' : ''} ${screenMode ? 'playerStream' : ''}`}>
                     <button className="avatarBtn" onClick={() => setActivePlayerId(p.id)}>
                       <span className="avatar">{p.avatar}</span>
                     </button>
@@ -443,7 +469,11 @@ export default function App() {
                       <div className="playerName">{p.name}</div>
                       <label className="scoreWrap">
                         Очки
-                        <input type="number" value={p.score} onChange={(e) => updateScore(p.id, Number(e.target.value || 0))} />
+                        {screenMode ? (
+                          <div className="scoreValue">{p.score}</div>
+                        ) : (
+                          <input type="number" value={p.score} onChange={(e) => updateScore(p.id, Number(e.target.value || 0))} />
+                        )}
                       </label>
                       {!screenMode && (
                         <div className="quickScoreRow">
