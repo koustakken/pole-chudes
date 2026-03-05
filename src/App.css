@@ -257,8 +257,6 @@
 
 .wheelSector {
   position: absolute;
-  left: 50%;
-  top: 50%;
   transform-origin: center center;
   border: 1px solid #93c5fd;
   background: #fff;
