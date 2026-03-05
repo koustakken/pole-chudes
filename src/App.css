@@ -28,6 +28,25 @@
   gap: 14px;
 }
 
+.turnCard {
+  margin-bottom: 14px;
+  background: #ffffff;
+  border: 1px solid #dbe5f4;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.turnActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .boardCard,
 .card {
   background: #ffffff;
@@ -268,6 +287,15 @@ button.danger {
 
 @media (max-width: 980px) {
   .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .turnCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .guessRow {
     grid-template-columns: 1fr;
   }
 }

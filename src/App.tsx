@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 
 type Player = {
@@ -57,6 +57,20 @@ export default function App() {
       return openedLetters.includes(normalizeLetter(ch)) ? ch : '_'
     })
   }, [openedLetters])
+
+  const activePlayer = players.find((p) => p.id === activePlayerId) ?? null
+
+  const nextPlayer = () => {
+    if (players.length === 0) return
+    if (!activePlayerId) {
+      setActivePlayerId(players[0].id)
+      return
+    }
+
+    const idx = players.findIndex((p) => p.id === activePlayerId)
+    const nextIdx = idx === -1 ? 0 : (idx + 1) % players.length
+    setActivePlayerId(players[nextIdx].id)
+  }
 
   const addPlayer = () => {
     const name = newPlayerName.trim()
@@ -182,12 +196,43 @@ export default function App() {
     setStatus('Новый раунд готов')
   }
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const tag = (event.target as HTMLElement | null)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
+
+      if (event.code === 'Space') {
+        event.preventDefault()
+        spinWheel()
+      }
+
+      if (event.key.toLowerCase() === 'n') {
+        event.preventDefault()
+        nextPlayer()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isSpinning, players, activePlayerId])
+
   return (
     <div className="page">
       <header className="topbar">
         <h1>Поле Чудес — студия ведущего</h1>
         <span className="step">Шаг 3/6: барабан + буквы/слово + ручной контроль очков</span>
       </header>
+
+      <section className="turnCard">
+        <div>
+          <div className="label">Сейчас ходит</div>
+          <strong>{activePlayer ? `${activePlayer.avatar} ${activePlayer.name}` : 'Игрок не выбран'}</strong>
+        </div>
+        <div className="turnActions">
+          <button className="ghost" onClick={nextPlayer}>Следующий игрок (N)</button>
+          <button onClick={spinWheel} disabled={isSpinning}>{isSpinning ? 'Крутим...' : 'Крутить барабан (Space)'}</button>
+        </div>
+      </section>
 
       <main className="layout">
         <section className="boardCard">
