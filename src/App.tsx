@@ -19,9 +19,9 @@ const DEFAULT_CATEGORY = 'Демо раунд'
 const STORAGE_KEY = 'pole-chudes-state-v1'
 
 const PHRASE_PRESETS = [
-  { category: 'Кино', phrase: 'БРИЛЛИАНТОВАЯ РУКА' },
-  { category: 'Мультфильм', phrase: 'БРЕМЕНСКИЕ МУЗЫКАНТЫ' },
-  { category: 'Пословица', phrase: 'СЕМЬ РАЗ ОТМЕРЬ ОДИН РАЗ ОТРЕЖЬ' },
+  { round: 'Раунд 1', category: 'Кино', hint: 'Советская киноклассика', phrase: 'БРИЛЛИАНТОВАЯ РУКА' },
+  { round: 'Раунд 2', category: 'Мультфильм', hint: 'Музыкальная сказка', phrase: 'БРЕМЕНСКИЕ МУЗЫКАНТЫ' },
+  { round: 'Раунд 3', category: 'Пословица', hint: 'О внимательности', phrase: 'СЕМЬ РАЗ ОТМЕРЬ ОДИН РАЗ ОТРЕЖЬ' },
 ]
 
 const SECTORS: Sector[] = [
@@ -77,6 +77,8 @@ export default function App() {
 
   const [phrase, setPhrase] = useState(DEFAULT_PHRASE)
   const [category, setCategory] = useState(DEFAULT_CATEGORY)
+  const [roundTitle, setRoundTitle] = useState('Раунд 1')
+  const [hint, setHint] = useState('')
   const [showAnswer, setShowAnswer] = useState(false)
 
   const [openedLetters, setOpenedLetters] = useState<string[]>([])
@@ -247,8 +249,15 @@ export default function App() {
     setStatus('Новый раунд готов')
   }
 
-  const quickStartRound = (nextCategory?: string, nextPhrase?: string) => {
+  const quickStartRound = (
+    nextRound?: string,
+    nextCategory?: string,
+    nextHint?: string,
+    nextPhrase?: string,
+  ) => {
+    if (nextRound) setRoundTitle(nextRound)
     if (nextCategory) setCategory(nextCategory)
+    if (nextHint !== undefined) setHint(nextHint)
     if (nextPhrase) setPhrase(nextPhrase)
     resetRound()
     setStatus('Раунд запущен')
@@ -319,6 +328,8 @@ export default function App() {
         activePlayerId?: string | null
         phrase?: string
         category?: string
+        roundTitle?: string
+        hint?: string
         openedLetters?: string[]
         usedLetters?: string[]
       }
@@ -327,6 +338,8 @@ export default function App() {
       if (data.activePlayerId !== undefined) setActivePlayerId(data.activePlayerId)
       if (data.phrase) setPhrase(data.phrase)
       if (data.category) setCategory(data.category)
+      if (data.roundTitle) setRoundTitle(data.roundTitle)
+      if (data.hint !== undefined) setHint(data.hint)
       if (data.openedLetters) setOpenedLetters(data.openedLetters)
       if (data.usedLetters) setUsedLetters(data.usedLetters)
       setStatus('Состояние восстановлено')
@@ -338,9 +351,9 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ players, activePlayerId, phrase, category, openedLetters, usedLetters }),
+      JSON.stringify({ players, activePlayerId, phrase, category, roundTitle, hint, openedLetters, usedLetters }),
     )
-  }, [players, activePlayerId, phrase, category, openedLetters, usedLetters])
+  }, [players, activePlayerId, phrase, category, roundTitle, hint, openedLetters, usedLetters])
 
   return (
     <div className="page">
@@ -357,7 +370,7 @@ export default function App() {
           <button className="ghost" onClick={() => setShowHotkeys((v) => !v)}>
             {showHotkeys ? 'Скрыть hotkeys' : 'Показать hotkeys'}
           </button>
-          <button className="ghost" onClick={() => quickStartRound()}>Быстрый старт раунда</button>
+          <button className="ghost" onClick={() => quickStartRound(roundTitle, category, hint, phrase)}>Быстрый старт раунда</button>
           <button className="ghost" onClick={() => void openFullscreen()}>Fullscreen (F)</button>
           <button className="ghost" onClick={() => setScreenMode((v) => !v)}>
             {screenMode ? 'Выйти из Screen Mode' : 'Screen Mode'}
@@ -390,6 +403,10 @@ export default function App() {
         <section className={`boardCard ${celebrate ? 'celebrate' : ''}`}>
           <div className="boardHeader">
             <div>
+              <div className="label">Раунд</div>
+              <strong>{roundTitle}</strong>
+            </div>
+            <div>
               <div className="label">Тема</div>
               <strong>{category}</strong>
             </div>
@@ -401,20 +418,27 @@ export default function App() {
 
           {!screenMode && (
             <>
-              <div className="hostSetup">
+              <div className="hostSetup hostSetupWide">
+                <input value={roundTitle} onChange={(e) => setRoundTitle(e.target.value)} placeholder="Название раунда" />
                 <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Категория" />
-                <input value={phrase} onChange={(e) => setPhrase(e.target.value.toUpperCase())} placeholder="Фраза" />
+                <input value={hint} onChange={(e) => setHint(e.target.value)} placeholder="Вопрос / подсказка" />
+                <input value={phrase} onChange={(e) => setPhrase(e.target.value.toUpperCase())} placeholder="Загаданная фраза" />
                 <button className="ghost" onClick={() => setShowAnswer((v) => !v)}>
                   {showAnswer ? 'Скрыть ответ' : 'Показать ответ ведущему'}
                 </button>
               </div>
 
+              {hint && <div className="hintPreview">Подсказка: {hint}</div>}
               {showAnswer && <div className="answerPreview">Ответ: {phrase}</div>}
 
               <div className="presetRow">
                 {PHRASE_PRESETS.map((p) => (
-                  <button key={p.phrase} className="ghost" onClick={() => quickStartRound(p.category, p.phrase)}>
-                    {p.category}
+                  <button
+                    key={p.phrase}
+                    className="ghost"
+                    onClick={() => quickStartRound(p.round, p.category, p.hint, p.phrase)}
+                  >
+                    {p.round}: {p.category}
                   </button>
                 ))}
               </div>

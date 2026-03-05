@@ -120,6 +120,19 @@
   margin-bottom: 8px;
 }
 
+.hostSetupWide {
+  grid-template-columns: 170px 180px 1fr 1fr auto;
+}
+
+.hintPreview {
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 1px dashed #94a3b8;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
 .answerPreview {
   margin-bottom: 10px;
   padding: 8px 10px;
@@ -446,7 +459,8 @@ button.danger {
     grid-template-columns: 1fr;
   }
 
-  .hostSetup {
+  .hostSetup,
+  .hostSetupWide {
     grid-template-columns: 1fr;
   }
 
