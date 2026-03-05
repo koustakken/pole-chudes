@@ -433,50 +433,48 @@ export default function App() {
           </div>
 
           {!screenMode && (
-            <>
-              <div className="guessCard">
-                <div className="guessRow">
-                  <input
-                    placeholder="Буква"
-                    value={letterInput}
-                    onChange={(e) => setLetterInput(e.target.value.slice(0, 1))}
-                  />
-                  <button onClick={guessLetter}>Открыть букву</button>
-                  <input
-                    placeholder="Слово целиком"
-                    value={wordInput}
-                    onChange={(e) => setWordInput(e.target.value)}
-                  />
-                  <button onClick={guessWord}>Проверить слово</button>
-                  <button className="ghost" onClick={resetRound}>Новый раунд</button>
-                </div>
-                <div className="usedLetters">Были буквы: {usedLetters.join(', ') || '—'}</div>
-                <div className="status">Статус: {status}</div>
+            <div className="guessCard">
+              <div className="guessRow">
+                <input
+                  placeholder="Буква"
+                  value={letterInput}
+                  onChange={(e) => setLetterInput(e.target.value.slice(0, 1))}
+                />
+                <button onClick={guessLetter}>Открыть букву</button>
+                <input
+                  placeholder="Слово целиком"
+                  value={wordInput}
+                  onChange={(e) => setWordInput(e.target.value)}
+                />
+                <button onClick={guessWord}>Проверить слово</button>
+                <button className="ghost" onClick={resetRound}>Новый раунд</button>
               </div>
-
-              <div className="wheelCard">
-                <div className="wheelHeader">
-                  <h2>Барабан ведущего</h2>
-                  <button onClick={spinWheel} disabled={isSpinning}>
-                    {isSpinning ? 'Крутим...' : 'Крутить барабан'}
-                  </button>
-                </div>
-
-                <div className="wheelStrip">
-                  {SECTORS.map((s, i) => (
-                    <div key={`${s.label}-${i}`} className={`wheelSector ${i === spinIndex ? 'active' : ''}`}>
-                      {s.label}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="wheelResult">
-                  <strong>Результат: </strong>
-                  {currentSector ? currentSector.label : '—'}
-                </div>
-              </div>
-            </>
+              <div className="usedLetters">Были буквы: {usedLetters.join(', ') || '—'}</div>
+              <div className="status">Статус: {status}</div>
+            </div>
           )}
+
+          <div className={`wheelCard ${screenMode ? 'wheelCardScreen' : ''}`}>
+            <div className="wheelHeader">
+              <h2>Барабан</h2>
+              <button onClick={spinWheel} disabled={isSpinning}>
+                {isSpinning ? 'Крутим...' : 'Крутить барабан'}
+              </button>
+            </div>
+
+            <div className="wheelStrip">
+              {SECTORS.map((s, i) => (
+                <div key={`${s.label}-${i}`} className={`wheelSector ${i === spinIndex ? 'active' : ''}`}>
+                  {s.label}
+                </div>
+              ))}
+            </div>
+
+            <div className="wheelResult">
+              <strong>Результат: </strong>
+              {currentSector ? currentSector.label : '—'}
+            </div>
+          </div>
         </section>
 
         <aside className="panel">

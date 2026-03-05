@@ -198,6 +198,10 @@
   background: #f8fbff;
 }
 
+.wheelCardScreen {
+  margin-top: 16px;
+}
+
 .wheelHeader {
   display: flex;
   justify-content: space-between;
